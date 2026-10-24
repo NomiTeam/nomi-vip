@@ -1,0 +1,8 @@
+No project-wide license has been selected for the new NomiVIP source.
+This file does not grant or imply an MIT, GPL, or other blanket license over
+third-party code or dependencies. No third-party binaries are distributed here.
+
+The Residence dependency supplied for compatibility inspection contains the
+GNU General Public License, version 3. Its license text is retained unchanged
+in LICENSES/Residence-GPL-3.0.txt and is preserved inside locally transformed
+Residence archives. This does not relicense other components.
