@@ -41,6 +41,13 @@ public final class NomiVIP extends JavaPlugin implements Listener, CommandExecut
         for (String name : List.of("nuomiscale", "nuomifly", "nomivip")) {
             Objects.requireNonNull(getCommand(name)).setExecutor(this);
         }
+        Objects.requireNonNull(getCommand("nomivipgrant")).setExecutor((sender, command, label, args) -> {
+            sender.sendMessage("会员完成回执桥不可用，未执行会员变更。");
+            return true;
+        });
+        if (getServer().getPluginManager().isPluginEnabled("LuckPerms")) {
+            MembershipRegistration.register(this);
+        }
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getOnlinePlayers().forEach(this::track);
     }
