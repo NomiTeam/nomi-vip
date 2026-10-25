@@ -1,6 +1,6 @@
 # NomiVIP 1.0.0
 
-独立管理会员体型、当前会话的全图飞行，以及 Residence / PlayerWarp 的会员兼容逻辑。面向 Paper/Purpur 26.3 和提供对应实体调度 API 的 Folia/Lophine 26.3。没有价格、群标识、服务器地址或生产配置。
+读取 LuckPerms 提供的有效权限，执行体型与当前会话全图飞行的最小行为桥，以及 Residence / PlayerWarp 的会员兼容逻辑。没有会员数据库，不缓存身份或等级。面向 Paper/Purpur 26.3 和提供对应实体调度 API 的 Folia/Lophine 26.3。没有价格、群标识、服务器地址或生产配置。
 
 当前已完成离线编译、领域测试、真实依赖字节码验证及 DeluxeHub 3.8.5 的只读双跳适配；**尚未启动真实服务器验收，不能将当前版本认定为大厅可部署版本**。
 
@@ -13,7 +13,7 @@ python3 build.py --deps-dir "$NOMI_DEPS_DIR" --dh-jar "$DELUXEHUB_INPUT"
 # 或设置 NOMI_DEPS_DIR 后执行 python3 build.py
 ```
 
-依赖目录可使用包含 `lobby/libraries` 和 `lobby/plugins` 的离线依赖树。需要 Purpur API 26.3、其 Adventure 等编译依赖、Residence 6.0.3.3、PlayerWarp 2.8.0-free；兼容生成器另外需要 ASM 9.x 的 core/tree/util/analysis。JDK 25 已实际以 `--release 21` 编译成功；这不表示依赖 Java 25 的服务端能在 Java 21 上运行。输出为 `build/NomiVIP-1.0.0.jar`，只含本项目类和 plugin.yml。`build/`、`.work/` 和测试日志均被忽略。
+依赖目录可使用包含 `lobby/libraries` 和 `lobby/plugins` 的离线依赖树。需要 Purpur API 26.3、其 Adventure 等编译依赖、Residence 6.0.3.3、PlayerWarp 2.8.0-free；兼容生成器另外需要 ASM 9.x 的 core/tree/util/analysis。JDK 25 已实际以 `--release 21` 编译成功；这不表示依赖 Java 25 的服务端能在 Java 21 上运行。输出为 `build/NomiVIP-1.0.0.jar`，只含本项目运行类（含控制台领域自检）和 plugin.yml；测试入口和 DH 替身单独编译到 `build/test-classes`，构建后检查它们不进入运行 JAR。`build/`、`.work/` 和测试日志均被忽略。
 
 | 命令 | 用途 |
 | --- | --- |
@@ -50,3 +50,6 @@ Residence 与 PlayerWarp 的迁移、输入指纹、可重复生成、升级回�
 `build.py` 执行 13 组策略测试及 9 组状态/报价测试。实际迁移时已先观察各组 RED，再保留 GREEN 日志于私有工作目录。另有 DH 状态回归；提供 `--dh-jar` 时还用真实 DH 类执行监听、发射/冷却/取消及适配器失败关闭测试（Bukkit 边界使用隔离替身，需要 SnakeYAML 2.2 等运行依赖）。离线行为测试不包含真实物理、声音动作或调度并发。兼容生成器另执行真实依赖的 JVM/ASM 验证和逐条目检查；这些检查不能替代真实服务端、经济插件和跨服同步验收。控制台 selftest 只运行明确标示的领域测试。
 
 新源码尚未选择统一开源许可证。第三方依赖不随本仓库发布；来源许可情况与保留的 Residence GPL 文本见 [LICENSE](LICENSE) 和 [NOTICE.md](NOTICE.md)。
+
+
+本轮原生替代核验：TrMenu 3.12.5 的真实 Console 动作会解析占位符后通过平台任务派发控制台命令；本地原版 26.2 的真实 AttributeCommand 支持 `attribute <target> minecraft:scale base set <value>`。这只证明语法和派发机制，未证明目标 26.3/Folia 上实体属性变更的线程安全。当前保留本人限定、实体调度的 `nuomiscale` 最小桥，体型操作独立在 `ScaleControl`，不宣称原生迁移或卸载已完成。菜单门槛不能代替执行时权限复核；不得为了省桥向玩家开放 `minecraft.command.attribute`。完整离线变更与待验原生方案见本次私有交接 `.work/native-first/backend-handoff.md`。
