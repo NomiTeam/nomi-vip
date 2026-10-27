@@ -105,6 +105,8 @@ def main():
     for case in 'restored off revoke claim native jump nofly quote stale-quote'.split():
         run_test('TransitionTest', case)
     run_test('DhTest')
+    run_test('QrLookupRuntimeTest', extra_classpath=lp_runtime)
+    run_test('QrOfflineTest', extra_classpath=lp_runtime)
     run_test('ReceiptIdentityTest', extra_classpath=lp_runtime)
     run_test('ReceiptExpiryTest', extra_classpath=lp_runtime)
     run_test('MembershipGrantTest', extra_classpath=lp_runtime)

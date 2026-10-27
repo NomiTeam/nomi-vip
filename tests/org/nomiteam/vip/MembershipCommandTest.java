@@ -60,8 +60,8 @@ public final class MembershipCommandTest {
                 viewer.current = true;
                 var uuidCommand = new MembershipCommand(named.service(), target -> audience, errors::add,
                         Clock.fixed(Instant.parse("2026-10-26T00:00:00Z"), ZoneOffset.UTC));
-                var nameCommand = new MembershipNameCommand(name -> name.equals("Buyer_1") ? id : null,
-                        uuidCommand);
+                var nameCommand = new MembershipNameCommand(name -> java.util.concurrent.CompletableFuture.completedFuture(name.equals("Buyer_1") ? id : null),
+                        uuidCommand, Runnable::run, ignored -> {});
                 String[] namedArgs = {"Buyer_1", group, days};
                 nameCommand.onCommand(player, null, "nomivipgrantname", namedArgs);
                 for (String[] invalid : List.of(new String[]{"Offline", group, days},
@@ -88,7 +88,7 @@ public final class MembershipCommandTest {
             viewer.messages.clear();
             viewer.tasks.clear();
             var uuidCommand = new MembershipCommand(named.service(), target -> audience, errors::add, clock);
-            var nameCommand = new MembershipNameCommand(name -> id, uuidCommand);
+            var nameCommand = new MembershipNameCommand(name -> java.util.concurrent.CompletableFuture.completedFuture(id), uuidCommand, Runnable::run, ignored -> {});
             nameCommand.onCommand(console, null, "nomivipgrantname", new String[]{"Buyer_1", "vip", "30"});
             if (mode.equals("save-failure")) {
                 named.saved.completeExceptionally(new IllegalStateException("storage failure"));
@@ -105,7 +105,7 @@ public final class MembershipCommandTest {
                 assert viewer.messages.isEmpty() : mode;
             }
         }
-        System.out.println("PASS name adapter: six fixed plans, console only, exact online identity, invalid/offline rejected, LP save pending, one success");
+        System.out.println("PASS name adapter wiring: six fixed plans, console only, injected resolver acceptance/rejection, LP save pending, one success");
         System.out.println("PASS membership command: console only, canonical UUID, exact args/terms, online self, pending save, success and storage failure delivery");
     }
 }

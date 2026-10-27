@@ -46,10 +46,9 @@ final class MembershipRegistration {
                 "会员变更或保存未能确认成功；未发成功提示，不自动重试或扣费。", failure), clock);
         Objects.requireNonNull(plugin.getCommand("nomivipgrant")).setExecutor(executor);
         Objects.requireNonNull(plugin.getCommand("nomivipgrantname")).setExecutor(
-                new MembershipNameCommand(name -> {
-                    var player = plugin.getServer().getPlayerExact(name);
-                    return player != null && player.isOnline() && player.getName().equals(name)
-                            ? player.getUniqueId() : null;
-                }, executor));
+                new MembershipNameCommand(new MembershipIdentity(api.getUserManager())::resolve, executor,
+                        task -> plugin.getServer().getGlobalRegionScheduler().execute(plugin, task),
+                        failure -> plugin.getLogger().log(Level.WARNING,
+                                "会员名称解析或调度失败；未确认发货，不自动重试。", failure)));
     }
 }

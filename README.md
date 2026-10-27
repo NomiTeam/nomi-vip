@@ -2,7 +2,7 @@
 
 读取 LuckPerms 提供的有效权限，执行体型与当前会话全图飞行的最小行为桥，以及 Residence / PlayerWarp 的会员兼容逻辑。没有会员数据库，不缓存身份或等级。面向 Paper/Purpur 26.3 和提供对应实体调度 API 的 Folia/Lophine 26.3。没有价格、群标识、服务器地址或生产配置。
 
-当前已完成离线编译、领域测试、真实依赖字节码验证及 DeluxeHub 3.8.5 的只读双跳适配；**尚未启动真实服务器验收，不能将当前版本认定为大厅可部署版本**。
+运行 JAR 提供会员授予与保存反馈、体型和飞行守卫，以及 DeluxeHub 3.8.5 的只读双跳适配。构建执行离线契约测试和依赖验证；服务端调度、经济插件与跨服同步行为需在目标环境验证。
 
 使用 JDK 25、Python 3，所有依赖由构建者在外部提供，不下载、不打包第三方 JAR：
 
@@ -22,6 +22,7 @@ python3 build.py --deps-dir "$NOMI_DEPS_DIR" --dh-jar "$DELUXEHUB_INPUT" --lp-ja
 | `nomivip status [玩家]` | 仅控制台：读取真实 flags、权限、模式、领地、会话、命令归属与兼容类证据 |
 | `nomivip selftest` | 仅控制台：执行 13 组实际领域断言；不改变玩家或数据库 |
 | `nomivipgrant <UUID> <vip\|svip\|mvip> <30\|90>` | 仅本地控制台：按固定档期累加 LP 临时组，保存完成后通知当前本人连接 |
+| `nomivipgrantname <名称> <vip\|svip\|mvip> <30\|90>` | 仅本地控制台：解析 LP 已知在线或离线账号，复用 UUID 授予及保存反馈 |
 
 全部权限默认 `false`，没有通配权限和自动继承。创造/旁观模式的固有飞行无需会员权限；审计命令不向玩家授予管理能力，控制台直接可用。
 
@@ -48,7 +49,7 @@ DH 适配仅支持已审查的 DeluxeHub 3.8.5（输入 SHA256 `d42836a1669f6fb4
 
 Residence 与 PlayerWarp 的迁移、输入指纹、可重复生成、升级回退及内测清单见 [compat/README.md](compat/README.md)。兼容生成器输出只留在本地私有工作目录，不是公开发行内容。
 
-`build.py` 执行 13 组策略测试及 9 组状态/报价测试。实际迁移时已先观察各组 RED，再保留 GREEN 日志于私有工作目录。另有 DH 状态回归；提供 `--dh-jar` 时还用真实 DH 类执行监听、发射/冷却/取消及适配器失败关闭测试（Bukkit 边界使用隔离替身，需要 SnakeYAML 2.2 等运行依赖）。离线行为测试不包含真实物理、声音动作或调度并发。兼容生成器另执行真实依赖的 JVM/ASM 验证和逐条目检查；这些检查不能替代真实服务端、经济插件和跨服同步验收。控制台 selftest 只运行明确标示的领域测试。
+`build.py` 执行 13 组策略测试及 9 组状态/报价测试。另有 DH 状态回归；提供 `--dh-jar` 时还用真实 DH 类执行监听、发射/冷却/取消及适配器失败关闭测试（Bukkit 边界使用隔离替身，需要 SnakeYAML 2.2 等运行依赖）。离线行为测试不包含真实物理、声音动作或调度并发。兼容生成器另执行真实依赖的 JVM/ASM 验证和逐条目检查；这些检查不能替代真实服务端、经济插件和跨服同步验收。控制台 selftest 只运行明确标示的领域测试。
 
 新源码尚未选择统一开源许可证。第三方依赖不随本仓库发布；来源许可情况与保留的 Residence GPL 文本见 [LICENSE](LICENSE) 和 [NOTICE.md](NOTICE.md)。
 
@@ -56,7 +57,21 @@ Residence 与 PlayerWarp 的迁移、输入指纹、可重复生成、升级回�
 
 保存成功通知在原玩家实体调度器内发送；退出重连、插件停用、超过五分钟的回调或已过期的会员回执不发送，重复完成/调度仅通知一次。这不是订单防重：每条合法控制台发货命令仍是一份独立授权请求。失败不自动重试、回滚、退款；LP 内存变更可能已发生，提示“未能确认成功”而不谎称未赋权。费用继续由现有 TrMenu/PlayerPoints 处理，其 `take-points` 未提供扣款布尔回执的既有边界保持不变，不能将本桥提示解读为支付链路的原子保证。
 
-本轮私有 `.work/continue-20261026/candidate/menus` 提供两服20份完整菜单候选，仅12张付款页将原 LP 发货动作换为 `nomivipgrant`；原 UUID 绑定、原生 DELAY、费用、扫码及布局保持。扫码适配入口 `nomivipgrantname <精确在线名称> <vip|svip|mvip> <30|90>` 可接收实际7yPay1.1.55支持的 `%player%` 替换，解析当前在线 UUID 后复用相同变更/保存回执；名称大小写严格匹配，不查询离线账号。仅本地控制台可调用，既有 UUID 入口不变。远端六商品原始发货命令尚缺，不宣称扫码已接入；实际替换模板与限制见 `.work/overnight-20261026/backend-handoff.md`。名称入口无法证明命令排队前的支付连接，也不提供订单去重；不能并列保留原 LP 发货或据此自动重试。LP 保存回执不证明其他服务器同步完成；离线测试不代替真实 Folia 调度、菜单扣费和本人收到消息的验收。
+名称入口 `nomivipgrantname <名称> <vip|svip|mvip> <30|90>` 接受1至16位字母、数字或下划线名称，通过 LP `lookupUniqueId` 异步查询，再用 `lookupUsername` 反向核对。名称按 LP 规则不区分大小写，支持 LP 已知的在线和离线账号；未知名称、解析失败、反向名称不一致及已加载账号同名不同 UUID 冲突会明确拒绝，不推算 UUID。LP 的公开单值映射接口不提供历史重名列表，名称入口采用命令执行时 LP 的已知映射，不证明历史支付时身份。
+
+解析完成后通过全局调度器复用 UUID 授予入口，异步加载、清理过期节点、累加并保存。离线账号无通知连接也能完成保存；在线成功通知仅发送给当次捕获且仍有效的本人连接，退出重连不补发旧通知。LP 保存回执不证明支付成功或其他服务器同步完成。
+
+支付系统若用 `%player%` 替换账号名称，六种固定档期的命令示例如下。命令字段不含前导 `/`；每次购买仅派发对应的一条发货命令，替换既有发货动作，不能并列执行。接口不提供订单去重或自动重试。
+
+```text
+nomivipgrantname %player% vip 30
+nomivipgrantname %player% vip 90
+nomivipgrantname %player% svip 30
+nomivipgrantname %player% svip 90
+nomivipgrantname %player% mvip 30
+nomivipgrantname %player% mvip 90
+```
 
 
-本轮原生替代核验：TrMenu 3.12.5 的真实 Console 动作会解析占位符后通过平台任务派发控制台命令；本地原版 26.2 的真实 AttributeCommand 支持 `attribute <target> minecraft:scale base set <value>`。这只证明语法和派发机制，未证明目标 26.3/Folia 上实体属性变更的线程安全。当前保留本人限定、实体调度的 `nuomiscale` 最小桥，体型操作独立在 `ScaleControl`，不宣称原生迁移或卸载已完成。菜单门槛不能代替执行时权限复核；不得为了省桥向玩家开放 `minecraft.command.attribute`。完整离线变更与待验原生方案见本次私有交接 `.work/native-first/backend-handoff.md`。
+
+TrMenu 的控制台动作解析占位符后派发命令；菜单门槛不能代替执行时权限复核。体型操作由 `ScaleControl` 内的 `nuomiscale` 入口限定本人并使用实体调度器。原生 `attribute` 命令的语法与派发能力不保证目标 Folia 环境中的实体属性变更线程安全，不应仅为体型操作向玩家开放 `minecraft.command.attribute`。

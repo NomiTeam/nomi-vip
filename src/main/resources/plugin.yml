@@ -6,7 +6,7 @@ folia-supported: true
 softdepend: [Residence, PlayerWarp, DeluxeHub, LuckPerms]
 commands:
   nomivipgrantname:
-    description: 控制台在线精确名称适配会员保存完成反馈
+    description: 控制台LP已知账号名称适配会员保存完成反馈
   nomivipgrant:
     description: 控制台会员临时组发货及保存完成反馈
   nuomiscale:
