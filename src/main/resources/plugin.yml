@@ -3,15 +3,13 @@ version: 1.0.0
 main: org.nomiteam.vip.NomiVIP
 api-version: '26.3'
 folia-supported: true
-softdepend: [Residence, PlayerWarp, DeluxeHub]
+softdepend: [LuckPerms]
 commands:
-  nuomiscale:
-    description: 调整自己的会员体型
+  nomivipgrant:
+    description: 控制台会员临时组发货及保存完成反馈
   nuomifly:
     description: 切换当前会话自己的会员飞行
     aliases: [fly]
-  nomivip:
-    description: 控制台只读状态与领域自检
 permissions:
   nuomi.vip.vip:
     default: false
@@ -19,17 +17,7 @@ permissions:
     default: false
   nuomi.vip.mvip:
     default: false
-  nuomi.vip.scale.10:
-    default: false
-  nuomi.vip.scale.20:
-    default: false
-  nuomi.vip.scale.30:
-    default: false
-  nuomi.vip.scale.40:
-    default: false
   nuomi.vip.fly.global:
-    default: false
-  nuomi.vip.fly.anyres:
     default: false
   nuomi.warp.free.2:
     default: false

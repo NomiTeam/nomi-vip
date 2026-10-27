@@ -1,0 +1,162 @@
+Title: '&6会员控制台'
+Layout:
+  - '#########'
+  - 'ABCDEFGHI'
+  - '###J#R###'
+  - '#########'
+Options:
+  Min-Click-Delay: 200
+Icons:
+  '#':
+    display:
+      material: GRAY_STAINED_GLASS_PANE
+      name: ' '
+  A:
+    display:
+      material: ARMOR_STAND
+      name: '&a恢复正常体型'
+    actions:
+      all:
+        - 'console: minecraft:attribute %player_name% minecraft:scale base set 1.0'
+  B:
+    display:
+      material: ARMOR_STAND
+      name: '&a体型 0.9'
+    actions:
+      all:
+        - condition: perm nuomi.vip.vip
+          actions:
+            - 'console: minecraft:attribute %player_name% minecraft:scale base set 0.9'
+          deny:
+            - condition: perm nuomi.vip.svip
+              actions:
+                - 'console: minecraft:attribute %player_name% minecraft:scale base set 0.9'
+              deny:
+                - condition: perm nuomi.vip.mvip
+                  actions:
+                    - 'console: minecraft:attribute %player_name% minecraft:scale base set 0.9'
+                  deny:
+                    - 'tell: &c你的会员等级尚未解锁这个体型。'
+  C:
+    display:
+      material: ARMOR_STAND
+      name: '&a体型 1.1'
+    actions:
+      all:
+        - condition: perm nuomi.vip.vip
+          actions:
+            - 'console: minecraft:attribute %player_name% minecraft:scale base set 1.1'
+          deny:
+            - condition: perm nuomi.vip.svip
+              actions:
+                - 'console: minecraft:attribute %player_name% minecraft:scale base set 1.1'
+              deny:
+                - condition: perm nuomi.vip.mvip
+                  actions:
+                    - 'console: minecraft:attribute %player_name% minecraft:scale base set 1.1'
+                  deny:
+                    - 'tell: &c你的会员等级尚未解锁这个体型。'
+  D:
+    display:
+      material: ARMOR_STAND
+      name: '&a体型 0.8'
+    actions:
+      all:
+        - condition: perm nuomi.vip.vip
+          actions:
+            - 'console: minecraft:attribute %player_name% minecraft:scale base set 0.8'
+          deny:
+            - condition: perm nuomi.vip.svip
+              actions:
+                - 'console: minecraft:attribute %player_name% minecraft:scale base set 0.8'
+              deny:
+                - condition: perm nuomi.vip.mvip
+                  actions:
+                    - 'console: minecraft:attribute %player_name% minecraft:scale base set 0.8'
+                  deny:
+                    - 'tell: &c你的会员等级尚未解锁这个体型。'
+  E:
+    display:
+      material: ARMOR_STAND
+      name: '&a体型 1.2'
+    actions:
+      all:
+        - condition: perm nuomi.vip.vip
+          actions:
+            - 'console: minecraft:attribute %player_name% minecraft:scale base set 1.2'
+          deny:
+            - condition: perm nuomi.vip.svip
+              actions:
+                - 'console: minecraft:attribute %player_name% minecraft:scale base set 1.2'
+              deny:
+                - condition: perm nuomi.vip.mvip
+                  actions:
+                    - 'console: minecraft:attribute %player_name% minecraft:scale base set 1.2'
+                  deny:
+                    - 'tell: &c你的会员等级尚未解锁这个体型。'
+  F:
+    display:
+      material: ARMOR_STAND
+      name: '&a体型 0.7'
+    actions:
+      all:
+        - condition: perm nuomi.vip.svip
+          actions:
+            - 'console: minecraft:attribute %player_name% minecraft:scale base set 0.7'
+          deny:
+            - condition: perm nuomi.vip.mvip
+              actions:
+                - 'console: minecraft:attribute %player_name% minecraft:scale base set 0.7'
+              deny:
+                - 'tell: &c你的会员等级尚未解锁这个体型。'
+  G:
+    display:
+      material: ARMOR_STAND
+      name: '&a体型 1.3'
+    actions:
+      all:
+        - condition: perm nuomi.vip.svip
+          actions:
+            - 'console: minecraft:attribute %player_name% minecraft:scale base set 1.3'
+          deny:
+            - condition: perm nuomi.vip.mvip
+              actions:
+                - 'console: minecraft:attribute %player_name% minecraft:scale base set 1.3'
+              deny:
+                - 'tell: &c你的会员等级尚未解锁这个体型。'
+  H:
+    display:
+      material: ARMOR_STAND
+      name: '&a体型 0.6'
+    actions:
+      all:
+        - condition: perm nuomi.vip.mvip
+          actions:
+            - 'console: minecraft:attribute %player_name% minecraft:scale base set 0.6'
+          deny:
+            - 'tell: &c你的会员等级尚未解锁这个体型。'
+  I:
+    display:
+      material: ARMOR_STAND
+      name: '&a体型 1.4'
+    actions:
+      all:
+        - condition: perm nuomi.vip.mvip
+          actions:
+            - 'console: minecraft:attribute %player_name% minecraft:scale base set 1.4'
+          deny:
+            - 'tell: &c你的会员等级尚未解锁这个体型。'
+  J:
+    display:
+      material: FEATHER
+      name: '&b切换会员飞行'
+    actions:
+      all:
+        - 'command: nuomifly'
+  R:
+    display:
+      material: ARROW
+      name: '&e返回'
+    actions:
+      all:
+        - 'open: VipShop'
