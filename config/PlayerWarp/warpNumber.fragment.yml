@@ -1,0 +1,6 @@
+warpNumber:
+  default: 0
+  vip1: 2
+  vip2: 4
+  vip3: 6
+  menu_session: 2147483647
