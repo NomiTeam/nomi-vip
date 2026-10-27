@@ -1,11 +1,6 @@
-# 对现有飞行权益组配置，不新增档位继承或改变权益组范围。
-# 将 <已有飞行权益组> 替换为实际组；飞行开关始终检查有效 nuomi.vip.fly.global。
-lp group <已有飞行权益组> permission set nuomi.vip.fly.global true
-lp group <已有飞行权益组> permission set residence.bypass.fly true
+# MVIP 的原生 Residence fly 绕过，按服务器上下文分别配置。
+lp group mvip permission set residence.bypass.fly true server=lobby
+lp group mvip permission set residence.bypass.fly true server=survival
 
-# 仅当该组既有权益明确包括绕过 nofly 时配置此独立原生节点：
-lp group <已有nofly绕过权益组> permission set residence.bypass.nofly true
-
-# bypass.fly 让 Residence 的原生 fly 切换不接管该账号；不等于主动开启飞行。
-# bypass.nofly 是独立原生权限，不由 NomiVIP 自动授予。
-# 旧 nuomi.vip.fly.anyres 不再被本插件解释；已有领地与 nofly 规则交由 Residence。
+# 不授予 residence.bypass.nofly，不移除或降低 VIP/SVIP 的既有权益。
+# 飞行开关仍检查有效 nuomi.vip.fly.global；领地规则由 Residence 自己处理。

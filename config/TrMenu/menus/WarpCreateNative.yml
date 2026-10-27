@@ -1,0 +1,98 @@
+Title: '&6&l玩家地标 &7- &e创建入口'
+Layout:
+- '#########'
+- '#   I   #'
+- '# L C   #'
+- '####B####'
+Options:
+  Min-Click-Delay: 1000
+  Arguments: false
+Bindings:
+  Commands:
+  - (?i)townwarpcreate
+Icons:
+  '#':
+    display:
+      material: GRAY_STAINED_GLASS_PANE
+      name: '&7'
+  B:
+    display:
+      material: FLOW_BANNER_PATTERN
+      name: '&r&x&F&F&B&B&D&0&l↩ 返回主菜单'
+      lore:
+      - '&r&x&F&F&F&4&B&4退出当前菜单。'
+    actions:
+      all:
+      - 'open: Menu'
+  I:
+    update: 20
+    display:
+      material: MAP
+      name: '&e&l地标创建'
+      lore:
+      - '&7当前持有：&f%playerWarp_num%'
+      - '&7VIP / SVIP / MVIP 免费持有：2 / 4 / 6'
+      - '&7删除地标后按当前持有数重新判断免费额度。'
+      - '&7超额沿用原生创建页：20饭团或2000米粒。'
+  L:
+    display:
+      material: ENDER_EYE
+      name: '&e&l查看玩家地标'
+      lore:
+      - '&7打开已有的玩家地标列表。'
+    actions:
+      all:
+      - 'command: plw open'
+  C:
+    display:
+      material: WRITABLE_BOOK
+      name: '&e&l创建本人地标'
+      lore:
+      - '&7有免费额度时直接进入名称输入。'
+      - '&7无免费额度时进入原生收费创建页。'
+      - '&7收费入口若提示上限未就绪，请稍后再点。'
+      - '&7本页不扣费，确认收费由原生创建页处理。'
+    actions:
+      all:
+      - condition: 'jexl: player == session.getViewer() && session.parse(''%'' + ''playerWarp_num'' + ''%'').matches(''[0-9]+'')'
+        actions:
+        - condition: 'jexl: player == session.getViewer() && session.parse(''%'' + ''playerWarp_num'' + ''%'').matches(''[0-9]+'')
+            && (session.parse(''%'' + ''playerWarp_num'' + ''%'') - 0) < (player.hasPermission(''nuomi.warp.free.6'') ? 6
+            : (player.hasPermission(''nuomi.warp.free.4'') ? 4 : (player.hasPermission(''nuomi.warp.free.2'') ? 2 : 0)))'
+          actions:
+          - close
+          - catcher:
+              warpname:
+                type: CHAT
+                start:
+                - 'tell: &e请在聊天栏输入地标名称；输入取消可退出。'
+                cancel:
+                - 'tell: &7已取消创建。'
+                - 'open: WarpCreateNative'
+                end:
+                - condition: 'jexl: player == session.getViewer() && session.parse(''%'' + ''trmenu_meta_input-warpname''
+                    + ''%'').matches(''[^\\s\\p{Cntrl}]{1,6}'')'
+                  actions:
+                  - condition: 'jexl: player == session.getViewer() && session.parse(''%'' + ''playerWarp_num'' + ''%'').matches(''[0-9]+'')
+                      && (session.parse(''%'' + ''playerWarp_num'' + ''%'') - 0) < (player.hasPermission(''nuomi.warp.free.6'')
+                      ? 6 : (player.hasPermission(''nuomi.warp.free.4'') ? 4 : (player.hasPermission(''nuomi.warp.free.2'')
+                      ? 2 : 0)))'
+                    actions:
+                    - 'console: playerwarp:playerWarp create %player_name% %trmenu_meta_input-warpname%'
+                    deny:
+                    - 'tell: &e免费持有资格已变化，请重新选择创建入口。'
+                    - 'open: WarpCreateNative'
+                  deny:
+                  - 'tell: &c名称不能为空、含空白/控制字符或超过原生长度限制，请重新输入。'
+                  - 'open: WarpCreateNative'
+          deny:
+          - condition: 'jexl: player == session.getViewer() && session.parse(''%'' + ''playerWarp_num'' + ''%'').matches(''[0-9]+'')
+              && player.hasPermission(''nuomi.warp.paid'')'
+            actions:
+            - 'console: luckperms:lp user %player_uuid% permission settemp playerWarp.number.menu_session true 2m server=lobby'
+            - 'delay: 10'
+            - 'command: plw createGui'
+            deny:
+            - 'tell: &c持有数尚未加载或未开放付费创建，本菜单未扣费。'
+        deny:
+        - 'tell: &c持有数尚未加载，请稍后再试；本菜单未扣费。'
