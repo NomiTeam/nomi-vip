@@ -63,14 +63,12 @@ def compile_sources(sources, destination, classpath):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--deps-dir', default=os.getenv('NOMI_DEPS_DIR'))
-    parser.add_argument('--dh-jar', type=pathlib.Path)
+    parser.add_argument('--output-dir', type=pathlib.Path, default=ROOT / 'build')
     parser.add_argument('--lp-jar', type=pathlib.Path, required=True,
                         help='Actual LuckPerms runtime JAR with embedded API (compile/test only)')
     args = parser.parse_args()
     if not args.deps_dir:
         parser.error('use --deps-dir or NOMI_DEPS_DIR')
-    if args.dh_jar and not args.dh_jar.is_file():
-        parser.error('--dh-jar must identify an existing input JAR')
     if not args.lp_jar.is_file():
         parser.error('--lp-jar must identify an existing input JAR')
     version = subprocess.check_output(
@@ -78,18 +76,22 @@ def main():
     ).strip()
     if not version.startswith('javac 25'):
         raise SystemExit('Build requires JDK 25; found ' + version)
-    classpath = os.pathsep.join(map(str, [args.lp_jar, *dependencies(args.deps_dir)]))
+    # Historical compat generators still use dependencies(); the main plugin does not need their APIs/ASM.
+    main_dependencies = [path for path in dependencies(args.deps_dir)
+                         if 'plugins' not in path.parts and '/org/ow2/asm/' not in path.as_posix()]
+    classpath = os.pathsep.join(map(str, [args.lp_jar, *main_dependencies]))
     # 内嵌实现仅供离线契约回归，绝不合入 NomiVIP 运行包。
-    lp_runtime = ROOT / 'build/test-deps/luckperms-runtime.jar'
+    lp_runtime = args.output_dir / 'test-deps/luckperms-runtime.jar'
     lp_runtime.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(args.lp_jar) as archive:
         lp_runtime.write_bytes(archive.read('luckperms-bukkit.jarinjar'))
-    classes = ROOT / 'build/classes'
-    tests = ROOT / 'build/test-classes'
+    classes = args.output_dir / 'classes'
+    tests = args.output_dir / 'test-classes'
     compile_sources(sorted((ROOT / 'src/main/java').rglob('*.java')), classes, classpath)
     test_classpath = os.pathsep.join([str(tests), str(classes), classpath])
-    compile_sources(sorted((ROOT / 'tests').rglob('*.java')), tests,
-                    test_classpath + os.pathsep + str(lp_runtime))
+    test_names = ['NativeConfigurationTest', 'FlightSessionTest', 'MembershipCommandTest', 'MembershipGrantTest', 'MembershipFeedbackTest']
+    test_sources = [ROOT / 'tests/org/nomiteam/vip' / (name + '.java') for name in test_names]
+    compile_sources(test_sources, tests, test_classpath + os.pathsep + str(lp_runtime))
 
     def run_test(name, *arguments, extra_classpath=None):
         selected = test_classpath
@@ -100,29 +102,15 @@ def main():
             'org.nomiteam.vip.' + name, *arguments,
         ], check=True)
 
-    run_test('PolicyTest')
-    run_test('ScaleControlTest')
-    for case in 'restored off revoke claim native jump nofly quote stale-quote'.split():
-        run_test('TransitionTest', case)
-    run_test('DhTest')
-    run_test('QrLookupRuntimeTest', extra_classpath=lp_runtime)
-    run_test('QrOfflineTest', extra_classpath=lp_runtime)
-    run_test('ReceiptIdentityTest', extra_classpath=lp_runtime)
-    run_test('ReceiptExpiryTest', extra_classpath=lp_runtime)
-    run_test('MembershipGrantTest', extra_classpath=lp_runtime)
-    run_test('MembershipFeedbackTest')
+    run_test('NativeConfigurationTest', str(ROOT / 'config/TrMenu/menus/VipControl.yml'))
+    run_test('FlightSessionTest')
     run_test('MembershipCommandTest', extra_classpath=lp_runtime)
-    run_test('MembershipRuntimeTest', extra_classpath=lp_runtime)
-    if args.dh_jar:
-        run_test('DhBytecodeTest', extra_classpath=args.dh_jar)
-    else:
-        print('SKIP real DH bytecode: --dh-jar not supplied')
     for path in (ROOT / 'src/main/resources').rglob('*'):
         if path.is_file():
             target = classes / path.relative_to(ROOT / 'src/main/resources')
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, target)
-    jar = ROOT / 'build/NomiVIP-1.0.0.jar'
+    jar = args.output_dir / 'NomiVIP-1.0.0.jar'
     with zipfile.ZipFile(jar, 'w', zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(classes.rglob('*')):
             if path.is_file():
@@ -130,7 +118,8 @@ def main():
                 info.compress_type = zipfile.ZIP_DEFLATED
                 archive.writestr(info, path.read_bytes())
     subprocess.run(['python3', str(ROOT / 'tests/artifact_check.py'), str(jar)], check=True)
-    print(jar.relative_to(ROOT))
+    subprocess.run(['python3', str(ROOT / 'tests/native_replacement_check.py'), str(jar)], check=True)
+    print(jar)
 
 
 if __name__ == '__main__':

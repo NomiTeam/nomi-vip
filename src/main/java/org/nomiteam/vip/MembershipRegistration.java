@@ -7,7 +7,7 @@ import java.util.logging.Level;
 import net.luckperms.api.LuckPerms;
 import org.bukkit.plugin.java.JavaPlugin;
 
-/** 可选 LP 接口隔离；LP 不可用不改变原有飞行/体型守卫。 */
+/** 可选 LP 接口隔离；LP 不可用不改变会员飞行开关。 */
 final class MembershipRegistration {
     private MembershipRegistration() {}
 
@@ -45,10 +45,5 @@ final class MembershipRegistration {
         }, failure -> plugin.getLogger().log(Level.WARNING,
                 "会员变更或保存未能确认成功；未发成功提示，不自动重试或扣费。", failure), clock);
         Objects.requireNonNull(plugin.getCommand("nomivipgrant")).setExecutor(executor);
-        Objects.requireNonNull(plugin.getCommand("nomivipgrantname")).setExecutor(
-                new MembershipNameCommand(new MembershipIdentity(api.getUserManager())::resolve, executor,
-                        task -> plugin.getServer().getGlobalRegionScheduler().execute(plugin, task),
-                        failure -> plugin.getLogger().log(Level.WARNING,
-                                "会员名称解析或调度失败；未确认发货，不自动重试。", failure)));
     }
 }
